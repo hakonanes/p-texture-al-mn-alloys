@@ -1,18 +1,19 @@
 # From PyPI
 dask
 diffpy.structure
-diffsims
+diffsims >= 0.5.0
 hyperspy
 importlib_metadata
 jupyterlab
-kikuchipy >= 0.5.7
+kikuchipy >= 0.6.1
 matplotlib
 matplotlib_scalebar
 morphops
 numpy
-orix>=0.8
+orix >= 0.9
 pandas
 pyebsdindex
+pyexcel-ods3
 PyQt5
 scipy
 scikit-image
