@@ -1,7 +1,7 @@
 % Correlated BSE/EBSD analysis of Al and particles in an Al-Mn alloy
 %
 % Håkon Wiik Ånes (hakon.w.anes@ntnu.no)
-% 2022-09-01
+% 2022-09-09
 
 clear variables, close all
 
@@ -24,7 +24,7 @@ ssO = specimenSymmetry('orthorhombic');
 
 % Directory and file names
 sample = '325c';
-dset_no = '3';
+dset_no = '1';
 dir_data = fullfile('/home/hakon/phd/data/p/prover', sample, dset_no);
 disp(dir_data)
 dir_kp = fullfile(dir_data, 'kp');
@@ -111,20 +111,20 @@ bin_edges = [mat hab max(mori)];
 [~, ~, gb2Id] = histcounts(mori, 'NumBins', 2, 'BinEdges', bin_edges);
 
 %% Plot GNDs, boundaries and particles
-%if to_plot
-%    figure
-%    plot(ebsd, ebsd.gnd, 'micronBar', 'off')
-%    mtexColorMap LaboTeX
-%    caxis([1e12 1e15])
-%    hold on
-%    plot(ebsd('notIndexed'), 'facecolor', 'k')
-%    plot(gb2(gb2Id == 1), 'linecolor', [0.7 0.7 0.7], 'linewidth', 1)
-%    plot(gb2(gb2Id == 2), 'linecolor', [0 0 0], 'linewidth', 1);
-%    legend('hide')
-%    hold off
-%    export_fig(fullfile(dir_mtex, 'maps_gnd_gb.png'), res)
-%    close(figure)
-%end
+if 0
+    figure
+    plot(ebsd, ebsd.gnd, 'micronBar', 'off')
+    mtexColorMap LaboTeX
+    caxis([1e12 1e15])
+    hold on
+    plot(ebsd('notIndexed'), 'facecolor', 'k')
+    plot(gb2(gb2Id == 1), 'linecolor', [0.7 0.7 0.7], 'linewidth', 1)
+    plot(gb2(gb2Id == 2), 'linecolor', [0 0 0], 'linewidth', 1);
+    legend('hide')
+    hold off
+    export_fig(fullfile(dir_mtex, 'maps_gnd_gb.png'), res)
+    close(figure)
+end
 
 %% Plot orientation maps
 if to_plot
@@ -139,8 +139,9 @@ if to_plot
         plot(ebsd('notIndexed'), 'facecolor', 'k')
         legend('hide')
         hold off
+        pause(1)
         export_fig(fullfile(dir_mtex, ['maps_om_ipf_' titles{i} '.png']), res)
-        close(figure)
+        close(gcf)
     end
 end
 
@@ -157,7 +158,7 @@ if to_plot
     legend('hide')
     hold off
     export_fig(fullfile(dir_mtex, 'maps_om_ipf_rd_gb.png'), res)
-    close(figure)
+    close(gcf)
 end
 
 %% Ideal orientations
@@ -180,7 +181,7 @@ ideal_oris_labels = {'br', 'cu',  's', 'cube', 'cubend', 'p', 'goss'};
 n_ideal = length(ideal_oris);
 
 %% Plot inverse pole figure key with components annotated
-if to_plot
+if 0
     om_al.inversePoleFigureDirection = yvector; % RD
     figure
     plot(om_al)
@@ -237,11 +238,12 @@ if to_plot
         hold on
     end
     plot(ebsd('notIndexed'), 'facecolor', 'k')
-    plot(gb2(gb2Id == 1), 'linecolor', [0.7 0.7 0.7], 'linewidth', 1)
-    plot(gb2(gb2Id == 2), 'linecolor', [0 0 0], 'linewidth', 1)
     legend('hide')
     export_fig(fullfile(dir_mtex, 'maps_grains_ideal_particles.png'), res)
-    close(figure)
+    plot(gb2(gb2Id == 1), 'linecolor', [0.7 0.7 0.7], 'linewidth', 1)
+    plot(gb2(gb2Id == 2), 'linecolor', [0 0 0], 'linewidth', 1)
+    export_fig(fullfile(dir_mtex, 'maps_grains_ideal_particles_gb.png'), res)
+    close(gcf)
 end
 
 %% ---------------------------------- DISPERSOIDS CLOSE TO GRAIN BOUNDARIES
@@ -362,6 +364,41 @@ end
 particles_close_size_all = zeros(size(gb2)); % All GBs
 particles_close_size_all(gb2.isIndexed) = particles_close_size;
 gb2.prop.particles_close_size = particles_close_size_all;
+
+%% Get fraction of HAB for each grain
+h = waitbar(0, 'Calculating fraction of HAB around each grain');
+grain_ids = grains2('indexed').id;
+numGrains = length(grains2('indexed'));
+xhab = zeros(numGrains, 1);
+for i = 1:numGrains
+    waitbar(i/numGrains)
+    id = grain_ids(i);
+    % Create logical vector
+    try
+        isHAB = grains2(id).boundary('indexed', 'indexed').misorientation...
+            .angle./degree > hab;
+        % Create new property of HAB fraction (nnz = number of non-zero)
+        xhab(i) = nnz(isHAB)/length(isHAB);
+    catch ME
+        fprintf('Grain %i is not here!\n', id);
+    end
+end
+close(h)
+
+xhab_all = zeros(length(grains2), 1);
+xhab_all(grains2.isIndexed) = xhab;
+grains2.prop.xhab = xhab_all;
+
+%% Set whether a grain is recrystallized
+grains2.prop.is_rx = zeros(length(grains2), 1);
+grains2(grains2.phase==1 & grains2.ecd > 1 & grains2.GOS < 2 &...
+     grains2.xhab > 0.5).is_rx = 1;
+
+if to_plot
+    figure
+    plot(grains2, grains.is_rx)
+    export_fig(fullfile(dir_mtex, 'maps_grains_is_rx.png'), res)
+end
 
 %% Plots as a sanity check of particle locations and boundaries of interest
 gb2_al = gb2('al', 'al');
@@ -504,7 +541,7 @@ fclose(fid);
 %% Write all relevant data to file
 fid = fopen(fullfile(dir_mtex, 'grains.txt'), 'w+');
 fprintf(fid, ['#id,phase,size,particle_ecd,ideal,gos,gam,'...
-    'at_particle,at_constituent_particle,dist_to_gb\n']);
+    'at_particle,at_constituent_particle,dist_to_gb,xhab,is_rx\n']);
 dataMat = [...
     grains2.id,...
     grains2.phase,...
@@ -516,8 +553,10 @@ dataMat = [...
     grains2.at_particle,...
     grains2.at_constituent_particle,...
     grains2.min_distance_to_gb,...
+    grains2.xhab,...
+    grains2.is_rx,...
 ];
-fprintf(fid, '%i,%i,%i,%.5f,%i,%.5f,%.5f,%i,%i,%.5f\n', dataMat');
+fprintf(fid, '%i,%i,%i,%.5f,%i,%.5f,%.5f,%i,%i,%.5f,%.5f,%i\n', dataMat');
 fclose(fid);
 
 % Grain neighbors
