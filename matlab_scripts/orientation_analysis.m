@@ -1,7 +1,7 @@
 % Correlated BSE/EBSD analysis of Al and particles in an Al-Mn alloy
 %
 % Håkon Wiik Ånes (hakon.w.anes@ntnu.no)
-% 2022-09-09
+% 2022-09-11
 
 clear variables, close all
 
@@ -24,7 +24,7 @@ ssO = specimenSymmetry('orthorhombic');
 
 % Directory and file names
 sample = '325c';
-dset_no = '1';
+dset_no = '3';
 dir_data = fullfile('/home/hakon/phd/data/p/prover', sample, dset_no);
 disp(dir_data)
 dir_kp = fullfile(dir_data, 'kp');
@@ -320,8 +320,8 @@ for i=1:n
     if ~isempty(min_distance)
         grains2(particle.id).min_distance_to_gb = min(min_distance);
     end
-
 end
+
 close(h)
 
 % Trim array of grain boundary indices to non-zero elements by finding
@@ -390,13 +390,23 @@ xhab_all(grains2.isIndexed) = xhab;
 grains2.prop.xhab = xhab_all;
 
 %% Set whether a grain is recrystallized
+%grains2_data = csvread(fullfile(dir_mtex, 'grains.txt'), 1, 0);
+%grains2.prop.xhab = grains2_data(:, 11);
+
 grains2.prop.is_rx = zeros(length(grains2), 1);
-grains2(grains2.phase==1 & grains2.ecd > 1 & grains2.GOS < 2 &...
-     grains2.xhab > 0.5).is_rx = 1;
+grains2(...
+    grains2.phase==1 &...
+    grains2.ecd > 4 &...  % 3 is too low
+    grains2.GOS < 1 * degree &...  % 0.5 too low
+    grains2.xhab > 0.5...  % 0.75 is too high
+).is_rx = 1;
 
 if to_plot
     figure
-    plot(grains2, grains.is_rx)
+    plot(grains2('indexed'), grains2('indexed').is_rx)
+    hold on
+    plot(grains2('notIndexed'), 'facecolor', 'k')
+    hold off
     export_fig(fullfile(dir_mtex, 'maps_grains_is_rx.png'), res)
 end
 
