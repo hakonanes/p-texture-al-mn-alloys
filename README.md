@@ -2,7 +2,33 @@
 
 Zenodo DOI coming after first `release' of repository.
 
-This repository contains Jupyter notebook files, MATLAB scripts, and other files, apart from the raw BSE images and EBSD datasets, which are necessary to reproduce the results and figures in the paper X, which was recently submitted to X. The paper preprint is available on [arXiv](). The raw EBSD and BSE data used in the paper is available on [Zenodo]().
+This repository contains Jupyter notebook files, MATLAB scripts, and other files, apart from the raw BSE images and EBSD datasets, which are necessary to reproduce the results and figures in the paper X, submitted to X:
+
+```bibtex
+@article{entry,
+  author   = {Håkon W. Ånes and Antonius T. J. {van Helvoort} and Knut Marthinsen},
+  year     = {2022},
+}
+
+```
+
+The preprint is available on *arXiv* (doi link):
+
+```bibtex
+@article{entry,
+  author   = {Håkon W. Ånes and Antonius T. J. {van Helvoort} and Knut Marthinsen},
+  year    = {2022},
+}
+```
+
+The raw EBSD and BSE data is available on *Zenodo* (doi link):
+
+```bibtex
+@dataset{entry,
+  year      = {2022},
+}
+```
+
 
 The contents in this repository is licensed under the GPLv3+, since many of the softwares used have the same license.
 
@@ -28,3 +54,10 @@ pip install -r requirements.txt
 * `particle_detection.ipynb`: Detect particles in BSE images and EBSD intensity maps.
 
 Installation of packages has been tested to work on Linux (Ubuntu 22.04) and Windows 10. All notebooks have been tested to work on Linux, while the two indexing and refinement notebooks have also been tested to work on Windows 10.
+
+### matlab_scripts
+
+MATLAB packages used in the scripts are [MTEX](https://mtex-toolbox.github.io/) and [export_fig](https://mathworks.com/matlabcentral/fileexchange/23629-export_fig).
+
+* `macrotexture.m`: Estimation of the orientation distribution function from four pole figures collected with an XRD diffractometer.
+* `orientation_analysis.m`: Correlated analysis of subgrains and particles based on the multimodal dataset, specifically dispersoids at subgrain boundaries and subgrains at constituent particles.
