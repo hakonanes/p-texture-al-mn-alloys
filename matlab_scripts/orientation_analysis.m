@@ -3,7 +3,8 @@
 % Håkon Wiik Ånes (hakon.w.anes@ntnu.no)
 % 2022-09-11
 
-clear variables, close all
+clear variables
+close all
 
 % Generate figures?
 to_plot = 1;
@@ -60,7 +61,8 @@ mat = 1 * degree;
 hab = 15; % Degrees
 
 % Particle classification threshold in microns
-dispersoid_threshold = 0.24;
+dispersoid_threshold_min = 0.03;
+dispersoid_threshold_max = 0.24;
 constituent_particle_threshold = 0.8;
 
 % Orientation color keys
@@ -141,7 +143,7 @@ if to_plot
         hold off
         pause(1)
         export_fig(fullfile(dir_mtex, ['maps_om_ipf_' titles{i} '.png']), res)
-        close(gcf)
+%        close(gcf)
     end
 end
 
@@ -257,8 +259,9 @@ gb2_al = gb2_al(~any(gb2_al.grainId == 0, 2));
 gb2_idx = 1:size(gb2_al);
 
 % Extract dispersoids to loop over
-dispersoid_condition = (grains2.phase == -1) & (grains2.particle_ecd <=...
-    dispersoid_threshold);
+dispersoid_condition = (grains2.phase == -1) & ...
+    (grains2.particle_ecd <= dispersoid_threshold_max) & ...
+    (grains2.particle_ecd >= dispersoid_threshold_min);
 grains_particles = grains2(dispersoid_condition);
 
 % Number of dispersoids
