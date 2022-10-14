@@ -49,11 +49,9 @@ s14 = '14_200915_e3_375c';
 s14Fname = '3xxx_e3_375c_R';
 s15 = '15_200915_e3_400c_2';
 s15Fname = '3xxx_e3_400c_R';
-s16 = '16_191113_e3_400c_1e5s';
-s16Fname = '3xxx_e3_400c_1e5s_R';
 
-sample = s16;
-fnamesPrefix = s16Fname;
+sample = s15;
+fnamesPrefix = s15Fname;
 disp(sample);
 
 basedir = '/home/hakon/phd/data/p/macrotexture';
@@ -122,9 +120,13 @@ s = orientation.byMiller([1 2 3], [6 3 4], cs, ssO);
 cube = orientation.byEuler(0, 0, 0, cs, ssO);
 cubeND = orientation.byMiller([0 0 1], [3 1 0], cs, ssO);
 p = orientation.byMiller([0 1 1], [-5 -6 6], cs, ssO);
-goss = orientation.byMiller([0 1 1], [1 0 0], cs, ssO);
 
-%% ODF in {111} PF with specified contour levels
+% Component parameters
+comps = {br, cu, s, cube, cubeND, p};
+comp_colors = {'g', 'b', 'm', 'r', 'orange', 'c'};
+comp_markers = {'d', '^', 'p', 's', 's', '>'};
+
+%% ODF in PFs with specified contour levels
 
 if to_plot
     levelsPF = [0, 1, 2, 3, 4, 5];
@@ -132,28 +134,25 @@ if to_plot
     odf.SS = ss;
     figure
     plotPDF(odf, h, 'upper', 'projection', 'eangle', 'contourf', levelsPF)
+    mtexColorMap white2black
     mtexColorbar
     export_fig(fullfile(outpath, 'odf_pfs.png'), res);
 end
 
-%% ODF in {111} PF with specified contour levels
+%% ODF in PFs with specified contour levels
 if to_plot
     levelsPF = [0, 1, 2, 3, 4, 5];
 
     odf.SS = ss;
     figure
     plotPDF(odf, h, 'upper', 'projection', 'eangle', 'contourf', levelsPF)
-    mtexColorbar
-    mtexColorMap WhiteJet
+    mtexColorMap white2black
     hold on
-    annotate(br.symmetrise, 'marker', 'd', 'markerfacecolor', 'g')
-    annotate(cu.symmetrise, 'marker', '^', 'markerfacecolor', 'b')
-    annotate(cube.symmetrise, 'marker', 's', 'markerfacecolor', 'r')
-    annotate(cubeND.symmetrise, 'marker', 'p', 'markerfacecolor', 'r')
-    annotate(goss.symmetrise, 'marker', 'o', 'markerfacecolor', 'y')
-    annotate(p.symmetrise, 'marker', '>', 'markerfacecolor', 'c')
-    annotate(s.symmetrise, 'marker', 'p', 'markerfacecolor', 'm')
-    mtexColorbar
+    for i=1:length(comps)
+        annotate(comps{i}.symmetrise, 'marker', comp_markers{i},...
+            'markerfacecolor', comp_colors{i});
+    end
+    mtexColorbar('title', 'Multiples of Random Density (MRD)')
     hold off
     export_fig(fullfile(outpath, 'odf_pfs_annotated.png'), res);
 end
@@ -165,72 +164,42 @@ if to_plot
 
     odf.SS = ssO;
     figure
-    plot(odf, 'phi2', [0 45 65]*degree, 'contourf', levelsODF, 'minmax')
+    plot(odf, 'phi2', [0 45 65]*degree, 'contourf', levelsODF)
     mtexColorMap white2black
     hold on
-    annotate(br.symmetrise, 'marker', 'd', 'markerfacecolor', 'g')
-    annotate(cu.symmetrise, 'marker', '^', 'markerfacecolor', 'b')
-    annotate(cube.symmetrise, 'marker', 's', 'markerfacecolor', 'r')
-    annotate(cubeND.symmetrise, 'marker', 'p', 'markerfacecolor', 'r')
-    annotate(goss.symmetrise, 'marker', 'o', 'markerfacecolor', 'y')
-    annotate(p.symmetrise, 'marker', '>', 'markerfacecolor', 'c')
-    annotate(s.symmetrise, 'marker', 'p', 'markerfacecolor', 'm')
-    mtexColorbar
+    for i=1:length(comps)
+        annotate(comps{i}.symmetrise, 'marker', comp_markers{i},...
+            'markerfacecolor', comp_colors{i});
+    end
+    mtexColorbar('title', 'Multiples of Random Density (MRD)')
     hold off
-%    export_fig(fullfile(outpath, 'odf_sections.png'), res);
-end
-
-%% Plot ODF in all Euler space phi2 sections
-
-if to_plot
-    figure
-    plot(odf, 'sections', 18, 'contourf', levelsODF)
-    mtexColorMap white2black
-    hold on
-    annotate(br.symmetrise, 'marker', 'd', 'markerfacecolor', 'g')
-    annotate(cu.symmetrise, 'marker', '^', 'markerfacecolor', 'b')
-    annotate(cube.symmetrise, 'marker', 's', 'markerfacecolor', 'r')
-    annotate(cubeND.symmetrise, 'marker', 'p', 'markerfacecolor', 'r')
-    annotate(goss.symmetrise, 'marker', 'o', 'markerfacecolor', 'y')
-    annotate(p.symmetrise, 'marker', '>', 'markerfacecolor', 'c')
-    annotate(s.symmetrise, 'marker', 'p', 'markerfacecolor', 'm')
-    mtexColorbar
-    hold off
-    export_fig(fullfile(outpath, 'odf_sections_all.png'), res);
+    export_fig(fullfile(outpath, 'odf_sections.png'), res);
 end
 
 %% Plot inverse pole figure
 
 if to_plot
     figure
-    plotIPDF(odf, [xvector, yvector, zvector], 'contourf', 'minmax') % contoured
-    %plotIPDF(odf, [xvector, yvector, zvector]) % continuous
-    mtexColorMap WhiteJet % or e.g. white2black
-    mtexColorbar
+    plotIPDF(odf, [xvector, yvector, zvector], 'contourf') % contoured
+    mtexColorMap white2black
     hold on
-    ms = 20;
-    annotate(br.symmetrise, 'marker', 'd', 'MarkerSize', ms,...
-        'markerfacecolor', 'g')
-    annotate(cu.symmetrise, 'marker', '^', 'MarkerSize', ms,...
-        'markerfacecolor', 'b')
-    annotate(cube.symmetrise, 'marker', 's', 'MarkerSize', ms,...
-        'markerfacecolor', 'r')
-    annotate(cubeND.symmetrise, 'marker', 'p', 'MarkerSize', ms,...
-        'markerfacecolor', 'r')
-    annotate(goss.symmetrise, 'marker', 'o', 'MarkerSize', ms,...
-        'markerfacecolor', 'y')
-    annotate(p.symmetrise, 'marker', '>', 'MarkerSize', ms,...
-        'markerfacecolor', 'c')
-    annotate(s.symmetrise, 'marker', 'p', 'MarkerSize', ms,...
-        'markerfacecolor', 'm')
+    for i=1:length(comps)
+        annotate(comps{i}.symmetrise, 'marker', comp_markers{i},...
+            'markerfacecolor', comp_colors{i}, 'markersize', 20);
+    end
+    mtexColorbar('title', 'Multiples of Random Density (MRD)')
     hold off
     export_fig(fullfile(outpath, 'odf_ipfs.png'), res);
 end
 
-%% Plot intensity along beta fibre from Cu to Brass and write results to file
+%% Plot intensity along beta fibre from Cu to Brass and write results to
+% file
+
+cu_fiber = orientation.byEuler([90 35 45] * degree, cs, ssO);
+br_fiber = orientation.byEuler([35 45 90] * degree, cs, ssO);
 
 odf.SS = ssO;
-f = fibre(cu, br, cs, ssO);
+f = fibre(cu_fiber, br_fiber, cs, ssO);
 
 % generate list from fibres and evalute ODF at specific orientations
 fibreOris = f.orientation;
@@ -283,7 +252,7 @@ if to_plot
     plot(evalOris.Phi/degree, evalValues, '-o')
     xlabel('\Phi \rightarrow', 'interpreter', 'tex')
     ylabel('Orientation density f(g)', 'interpreter', 'tex')
-    xlim([0 45])
+    xlim([min([f.o1.Phi f.o2.Phi]) max([f.o1.Phi f.o2.Phi])] / degree)
     export_fig(fullfile(outpath, 'fibre_cube_goss.png'), res);
 end
 
@@ -300,7 +269,7 @@ dlmwrite(datafname, [(evalOris.phi1/degree)' (evalOris.Phi/degree)'...
     (evalOris.phi2/degree)' evalValues'], '-append')
 
 %% plot intensity along fibre from Cube to ND-rotated Cube
-f = fibre(cube, cubeND45, cs, ssO);
+f = fibre(cube, orientation.byEuler([45 0 0] * degree, cs, ssO), cs, ssO);
 
 % Generate list from fibres and evalute ODF at specific orientations
 fibreOris = f.orientation;
@@ -318,7 +287,7 @@ if to_plot
     plot(evalOris.phi1/degree, evalValues, '-o')
     xlabel('\phi_1 \rightarrow', 'interpreter', 'tex')
     ylabel('Orientation density f(g)', 'interpreter', 'tex')
-    xlim([0 45])
+    xlim([min([f.o1.phi1 f.o2.phi1]) max([f.o1.phi1 f.o2.phi1])] / degree)
     export_fig(fullfile(outpath, 'fibre_cube_cubend.png'), res);
 end
 
@@ -334,8 +303,9 @@ fclose(fid);
 dlmwrite(datafname, [(evalOris.phi1/degree)' (evalOris.Phi/degree)'...
     (evalOris.phi2/degree)' evalValues'], '-append')
 
-%% plot intensity along fibre from Goss to P
-f = fibre(goss, p, cs, ssO);
+%% Plot intensity along fibre from Goss to P
+goss_fiber = orientation.byEuler([0 45 0] * degree, cs, ssO);
+f = fibre(goss_fiber, p, cs, ssO);
 
 % Generate list from fibres and evalute ODF at specific orientations
 fibreOris = f.orientation;
@@ -353,7 +323,7 @@ if to_plot
     plot(evalOris.phi1/degree, evalValues, '-o')
     xlabel('\phi_1 \rightarrow', 'interpreter', 'tex')
     ylabel('Orientation density f(g)', 'interpreter', 'tex')
-    xlim([0 60])
+    xlim([min([f.o1.phi1 f.o2.phi1]) max([f.o1.phi1 f.o2.phi1])] / degree)
     export_fig(fullfile(outpath, 'fibre_goss_p.png'), res);
 end
 
@@ -382,4 +352,3 @@ Ms = 100*volume(odf, s, spread)
 Mcube = 100*volume(odf, cube, spread)
 McubeND = 100*volume(odf, cubeND, spread)
 Mp = 100*volume(odf, p, spread)
-Mgoss = 100*volume(odf, goss, spread)
