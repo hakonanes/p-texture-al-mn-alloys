@@ -7,7 +7,7 @@ clear variables
 close all
 
 % Generate figures?
-to_plot = 1;
+to_plot = 0;
 plot_sanity_check = 0;
 
 % MTEX configuration
@@ -24,7 +24,7 @@ cs_al = cs{2};
 ssO = specimenSymmetry('orthorhombic');
 
 % Directory and file names
-sample = '325c';
+sample = '325c'; % 0s, 175c, 300c, 325c
 dset_no = '3';
 dir_data = fullfile('/home/hakon/phd/data/p/prover', sample, dset_no);
 disp(dir_data)
@@ -78,7 +78,7 @@ om_al.CS2 = ssO;
 %ebsdg.prop.gnd = gnd;
 %ebsd = ebsdg(~isnan(ebsdg.oldId));
 
-%% Subgrain reconstruction
+%% (Sub)grain reconstruction
 ebsd2 = ebsd;
 
 [grains, ebsd2.grainId, ebsd2.mis2mean] = calcGrains(ebsd2, 'angle',...
@@ -165,7 +165,10 @@ end
 
 %% Ideal orientations
 % Ideal grain texture components, rotated to match the global reference
-% frame: X (east) = ND, Y (north) = RD, Z (out of plane) = TD
+% frame:
+%   X (east)         = ND
+%   Y (north)        = RD
+%   Z (out of plane) = TD
 rot_scan2global = rotation.byMatrix([0 0 1; 1 0 0; 0 1 0]);
 
 br = rot_scan2global * orientation.byMiller([0 1 1], [2 -1 1], cs_al, ssO);
@@ -228,6 +231,56 @@ for i=1:length(grains2)
 end
 grains2.prop.ideal_ori = ideal_ori;
 grains2.prop.ideal_ori_id = ideal_ori_id;
+
+%% Plot orientation map of higher fidelity
+%region = [40, 35, 15, 15];
+
+% EBSD ROI
+%ebsd_roi = ebsd(inpolygon(ebsd, region));
+
+% Grains within ROI
+%grains_roi = grains2(inpolygon(grains2, region));
+%particles_roi = grains_roi('notIndexed');
+%particles_const_roi = particles_roi(...
+%    particles_roi.particle_ecd >= constituent_particle_threshold);
+%particles_disp_roi = particles_roi(...
+%    (particles_roi.particle_ecd >= dispersoid_threshold_min) &...
+%    (particles_roi.particle_ecd <= dispersoid_threshold_max)...
+%);
+
+% Subgrain boundaries within ROI
+%gb_roi = gb2(inpolygon(gb2, region));
+%mori_roi = gb_roi.misorientation.angle ./ degree;
+%bin_edges_roi = [mat hab max(mori_roi)];
+%[~, ~, gb_roiId] = histcounts(mori_roi, 'NumBins', 2, 'BinEdges',...
+%    bin_edges_roi);
+
+%figure
+%for i=1:n_ideal
+%    grains_i = grains_roi(ismember(grains_roi.ideal_ori_id, i));
+%    if ~isempty(grains_i)
+%        if i < 4
+%            color = 'g';
+%        elseif i == 7
+%            continue
+%        else
+%            color = ideal_colors{i};
+%        end
+%        plot(grains_i, 'facecolor', color, 'micronBar', 'off', 'facealpha', 0.5)
+%    end
+%    hold on
+%end
+%plot(particles_roi, 'facecolor', 'k')
+%hold on
+%plot(particles_const_roi.boundary, 'linecolor', 'r', 'linewidth', 4)
+%hold on
+%plot(particles_disp_roi, 'facecolor', 'r')
+%hold on
+%plot(gb_roi(gb_roiId == 1), 'linecolor', [0.7 0.7 0.7], 'linewidth', 2)
+%hold on
+%plot(gb_roi(gb_roiId == 2), 'linecolor', [0 0 0], 'linewidth', 2)
+%legend('hide')
+%export_fig(fullfile(dir_mtex, 'maps_roi_grains_ideal_particles.png'), '-r300')
 
 %% Plot of grains with grain boundaries per component
 if to_plot
@@ -466,9 +519,8 @@ mori_particles = gb2_al(gb2_al.n_particles_close > 0).misorientation;
 export(mori_particles, fullfile(dir_mtex, 'mori_gb_with_particles.txt'), 'quaternion', 'radians');
 
 %% Plot special boundaries
-pause(1)
-
 if to_plot
+    pause(1)
     figure
     for i=1:n_ideal
         grains_i = grains2(ismember(grains2.ideal_ori_id, i));
@@ -581,29 +633,29 @@ fclose(fid);
 al_ids = grains2('al').id;
 gb2.prop.is_al = ismember(gb2.grainId(:, 1), al_ids) .*...
     ismember(gb2.grainId(:, 2), al_ids);
+gb3 = gb2(gb2.is_al == 1);
 fid = fopen(fullfile(dir_mtex, 'grain_boundaries.txt'), 'w+');
 fprintf(fid, ['id1,id2,angle,a,b,c,d,is_csl3,is_csl7,n_dispersoids_close,'...
     'dispersoids_close_size,'...
-    'at_constituent_particle,component1,component2,is_al,length\n']);
+    'at_constituent_particle,component1,component2,length\n']);
 dataMat = [...
-    gb2.grainId(:, 1),...
-    gb2.grainId(:, 2),...
-    gb2.misorientation.angle,...
-    gb2.misorientation.a,...
-    gb2.misorientation.b,...
-    gb2.misorientation.c,...
-    gb2.misorientation.d,...
-    gb2.is_csl3,...
-    gb2.is_csl7,...
-    gb2.n_particles_close,...
-    gb2.particles_close_size,...
-    gb2.at_constituent_particle,...
-    gb2.component1',...
-    gb2.component2',...
-    gb2.is_al,...
-    gb2.segLength,...
+    gb3.grainId(:, 1),...
+    gb3.grainId(:, 2),...
+    gb3.misorientation.angle,...
+    gb3.misorientation.a,...
+    gb3.misorientation.b,...
+    gb3.misorientation.c,...
+    gb3.misorientation.d,...
+    gb3.is_csl3,...
+    gb3.is_csl7,...
+    gb3.n_particles_close,...
+    gb3.particles_close_size,...
+    gb3.at_constituent_particle,...
+    gb3.component1',...
+    gb3.component2',...
+    gb3.segLength,...
 ];
-fprintf(fid, '%i,%i,%.10f,%.5f,%.5f,%.5f,%.5f,%i,%i,%i,%.5f,%i,%i,%i,%i,%10f\n', dataMat');
+fprintf(fid, '%i,%i,%.10f,%.5f,%.5f,%.5f,%.5f,%i,%i,%i,%.5f,%i,%i,%i,%10f\n', dataMat');
 fclose(fid);
 
 close all
