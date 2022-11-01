@@ -24,8 +24,8 @@ cs_al = cs{2};
 ssO = specimenSymmetry('orthorhombic');
 
 % Directory and file names
-sample = '325c'; % 0s, 175c, 300c, 325c
-dset_no = '3';
+sample = '0s'; % 0s, 175c, 300c, 325c
+dset_no = '1';
 dir_data = fullfile('/home/hakon/phd/data/p/prover', sample, dset_no);
 disp(dir_data)
 dir_kp = fullfile(dir_data, 'kp');
