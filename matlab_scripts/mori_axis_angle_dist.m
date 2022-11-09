@@ -23,7 +23,7 @@ c_range = [-0.1 0.1];
 cs = crystalSymmetry('m-3m', [4.04 4.04 4.04], 'mineral', 'al');
 
 % Directory and file names
-sample = '325c'; % 0s, 175c, 300c, 325c
+sample = '300c'; % 0s, 175c, 300c, 325c
 dir_sample = fullfile('/home/hakon/phd/data/p/prover', sample);
 fname = 'grain_boundaries.txt';
 
@@ -79,6 +79,7 @@ disp_per_length = n_dispersoids_close(mask) ./ gb_length(mask);
 mori_lagb = mori(mori.angle < 15 * degree);
 mori_disp_lagb = mori_disp(mori_disp.angle < 15 * degree);
 disp_per_length_lagb = disp_per_length(mori_disp.angle < 15 * degree);
+gb_length_lagb = gb_length(mori.angle < 15 * degree);
 
 % Misorientation axes
 v_mori = mori.axis;
@@ -121,13 +122,6 @@ end
 export_fig(fullfile(dir_sample, 'mori_disp_axis_distributions_diff.png'), res)
 
 %% Plot angle histograms and differences between them for all GB
-bin_edges = linspace(0, maxAngle(cs), 20);
-bin_midpoints = bin_edges(2:end) - 0.5 * bin_edges(2);
-bar_width = 0.5 * bin_edges(2) / degree;
-
-mori_angles_dens = histcounts(mori.angle, bin_edges, 'Normalization', 'probability');
-mori_disp_angles_dens = histcounts(mori_disp.angle, bin_edges, 'Normalization', 'probability');
-
 figure
 plotAngleDistribution(mori_disp)
 hold on
@@ -139,54 +133,67 @@ ylim([0 25])
 export_fig(fullfile(dir_sample, 'mori_angle_distributions.png'), res)
 
 %% Difference for all GB
-mori_angle_diff = mori_disp_angles_dens - mori_angles_dens;
-bin_midpoints_deg = bin_midpoints / degree;
+max_omega = maxAngle(cs);
+bins = linspace(-eps, max_omega + 0.01, 15);
+bin_midpoints = 0.5*(bins(1:end - 1) + bins(2:end));
+
+mori_angles_dens = histcounts(mori.angle, bins, 'Normalization',...
+    'probability');
+mori_disp_angles_dens = histcounts(mori_disp.angle, bins,...
+    'Normalization', 'probability');
+mori_angle_diff = 100 * (mori_disp_angles_dens - mori_angles_dens);
 
 figure
-for i=1:(length(bin_edges) - 1)
+for i=1:length(bin_midpoints)
     mori_angle_diff_i = mori_angle_diff(i);
     if mori_angle_diff_i > 0
         bar_color = 'red';
     else
         bar_color = 'blue';
     end
-    bar(bin_midpoints_deg(i), mori_angle_diff_i, bar_width, 'FaceColor', bar_color)
+    bar(bin_midpoints(i) / degree, mori_angle_diff_i, 'FaceColor', bar_color)
     hold on
 end
 xlabel('Misorientation angle (degrees)')
 ylabel('Frequency difference (%)')
-ylim([-0.015 0.015])
-
+ylim([-1.2 1.2])
 set(gcf, 'color', 'w');
 export_fig(fullfile(dir_sample, 'mori_angle_distributions_diff.png'), res)
 
 %% Axis density of all LAGBs and those with particles on them
+mori_disp_lagb_dens = calcDensity(v_mori_disp_lagb, 'weights',...
+    disp_per_length_lagb);
+mori_lagb_dens = calcDensity(v_mori_lagb, 'weights', gb_length_lagb);
+
 figure
-h1 = plot(v_mori_disp_lagb, 'fundamentalSector', 'contourf');
+plot(mori_disp_lagb_dens, 'fundamentalSector', 'contourf');
 mtexTitle('With dispersoids')
 nextAxis
-h2 = plot(v_mori_lagb, 'fundamentalSector', 'contourf', 'colorrange', [0.5 2]);
+plot(mori_lagb_dens, 'fundamentalSector', 'contourf', 'colorrange', [0.5 2]);
 mtexTitle('All')
 mtexColorMap inferno
 mtexColorbar('title', 'MRD')
-export_fig(fullfile(dir_sample, 'mori_disp_axis_distributions_lagb.png'), res)
+export_fig(fullfile(dir_sample, 'mori_lagb_disp_axis_distributions.png'), res)
+
+pause(0.5)
 
 figure
-plot(v_mori_lagb, 'fundamentalSector')
-hold on
-v_grid = plotS2Grid(cs.fundamentalSector);
-plot(v_grid, h1.ZData - h2.ZData, 'fundamentalSector', 'contourf', 'colorrange', c_range);
-hold off
+plot(mori_disp_lagb_dens - mori_lagb_dens, 'fundamentalSector',...
+    'contourf', 'colorrange', c_range)
 mtexColorMap blue2red
-mtexColorbar('title', 'MRD')
-export_fig(fullfile(dir_sample, 'mori_disp_axis_distributions_lagb_diff.png'), res)
+if strcmp(sample, '325c')
+    mtexColorbar('title', 'MRD difference')
+end
+export_fig(fullfile(dir_sample, 'mori_lagb_disp_axis_distributions_diff.png'), res)
 
 %% Recrystallized boundaries
 if any(mask_rx)
+    % Get misorientations of boundaries with dispersoids
     mask_rx_disp = n_dispersoids_close_rx > 0;
     mori_rx_disp = mori_rx(mask_rx_disp);
     disp_per_length_rx = n_dispersoids_close_rx(mask_rx_disp) ./ gb_length_rx(mask_rx_disp);
 
+    % Get misorientation axes w/o dispersoids
     v_mori_rx = mori_rx.axis;
     v_mori_rx_disp = mori_rx_disp.axis;
     v_mori_rx.CS = cs;
@@ -197,42 +204,35 @@ if any(mask_rx)
     frac_sigma7_rx_disp = sum(angle(mori_rx_disp, CSL(7, cs)) < 15 * degree) / size(mori_rx_disp, 1);
     disp(frac_sigma7_rx_disp / frac_sigma7_rx)
 
-    % Axis density of all GBs and those with particles on them
+    % Axis density of all GBs and those with dispersoids on them
+    mori_rx_disp_dens = calcDensity(v_mori_rx_disp, 'weights',...
+    disp_per_length_rx);
+    mori_rx_dens = calcDensity(v_mori_rx, 'weights', gb_length_rx);
+
     figure
-    h1 = plot(v_mori_rx_disp, 'fundamentalSector', 'contourf');
+    plot(mori_rx_disp_dens, 'fundamentalSector', 'contourf');
     mtexTitle('With dispersoids')
     nextAxis
-    h2 = plot(v_mori_rx, 'fundamentalSector', 'contourf', 'colorrange',...
-        [0 2]);
+    plot(mori_rx_dens, 'fundamentalSector', 'contourf', 'colorrange', [0 2]);
     mtexTitle('All')
     mtexColorMap inferno
     mtexColorbar('title', 'MRD')
     export_fig(fullfile(dir_sample, 'mori_rx_disp_axis_distributions.png'), res)
-    % Difference
+
     figure
-    plot(v_mori_rx, 'fundamentalSector')
-    hold on
-    v_grid = plotS2Grid(cs.fundamentalSector);
-    plot(v_grid, h1.ZData - h2.ZData, 'fundamentalSector', 'contourf',...
-        'colorrange', [-0.5 0.5]);
-    hold off
+    plot(mori_rx_disp_dens - mori_rx_dens, 'fundamentalSector',...
+        'contourf', 'colorrange', [-0.5 0.5])
     mtexColorMap blue2red
-    mtexColorbar('title', 'MRD')
+    if strcmp(sample, '325c')
+        mtexColorbar('title', 'MRD difference')
+    end
     export_fig(fullfile(dir_sample, 'mori_rx_disp_axis_distributions_diff.png'), res)
 
     % Plot angle histograms and differences between them for all GB
-    bin_edges = linspace(0, maxAngle(cs), 20);
-    bin_midpoints = bin_edges(2:end) - 0.5 * bin_edges(2);
-    bar_width = 0.5 * bin_edges(2) / degree;
-    mori_rx_angles_dens = histcounts(mori_rx.angle, bin_edges,...
-        'Normalization', 'probability');
-    mori_rx_disp_angles_dens = histcounts(mori_rx_disp.angle, bin_edges,...
-        'Normalization', 'probability');
-
     figure
-    plotAngleDistribution(mori_disp)
+    plotAngleDistribution(mori_rx_disp)
     hold on
-    h = plotAngleDistribution(mori);
+    h = plotAngleDistribution(mori_rx);
     h(1).FaceColor = 'r';
     h(2).FaceColor = 'b';
     legend('With dispersoids', 'All')
@@ -240,23 +240,32 @@ if any(mask_rx)
     export_fig(fullfile(dir_sample, 'mori_rx_angle_distributions.png'), res)
 
     % Difference for all GB
-    mori_angle_diff = mori_rx_disp_angles_dens - mori_rx_angles_dens;
-    bin_midpoints_deg = bin_midpoints / degree;
+    max_omega = maxAngle(cs);
+    bins = linspace(-eps, max_omega + 0.01, 15);
+    bin_midpoints = 0.5*(bins(1:end - 1) + bins(2:end));
+    mori_rx_disp_dens = histcounts(mori_rx_disp.angle, bins,...
+        'Normalization', 'probability');
+    mori_rx_dens = histcounts(mori_rx.angle, bins, 'Normalization',...
+        'probability');
+    mori_rx_angle_diff = 100 * (mori_rx_disp_dens - mori_rx_dens);
 
     figure
-    for i=1:(length(bin_edges) - 1)
-        mori_angle_diff_i = mori_angle_diff(i);
-        if mori_angle_diff_i > 0
+    for i=1:length(bin_midpoints)
+        mori_rx_angle_diff_i = mori_rx_angle_diff(i);
+        if mori_rx_angle_diff_i > 0
             bar_color = 'red';
         else
             bar_color = 'blue';
         end
-        bar(bin_midpoints_deg(i), mori_angle_diff_i, bar_width, 'FaceColor', bar_color)
+        bar(bin_midpoints(i) / degree, mori_rx_angle_diff_i, 'FaceColor', bar_color)
         hold on
     end
     xlabel('Misorientation angle (degrees)')
     ylabel('Frequency difference (%)')
-    ylim([-0.05 0.05])
+    ylim([-6 6])
     set(gcf, 'color', 'w');
     export_fig(fullfile(dir_sample, 'mori_rx_angle_distributions_diff.png'), res)
 end
+
+%%
+close all
