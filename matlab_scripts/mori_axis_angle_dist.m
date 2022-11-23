@@ -23,7 +23,7 @@ c_range = [-0.1 0.1];
 cs = crystalSymmetry('m-3m', [4.04 4.04 4.04], 'mineral', 'al');
 
 % Directory and file names
-sample = '300c'; % 0s, 175c, 300c, 325c
+sample = '325c'; % 0s, 175c, 300c, 325c
 dir_sample = fullfile('/home/hakon/phd/data/p/prover', sample);
 fname = 'grain_boundaries.txt';
 
@@ -92,8 +92,9 @@ v_mori_lagb.CS = cs;
 v_mori_disp_lagb.CS = cs;
 
 %% Fraction of sigma7 sub-boundaries
+frac_sigma7_disp = sum(angle(mori_disp, CSL(7, cs)) < 15 * degree) /...
+    size(mori_disp, 1);
 frac_sigma7 = sum(angle(mori, CSL(7, cs)) < 15 * degree) / size(mori, 1);
-frac_sigma7_disp = sum(angle(mori_disp, CSL(7, cs)) < 15 * degree) / size(mori_disp, 1);
 disp(frac_sigma7_disp / frac_sigma7)
 
 %% Axis density of all GBs and those with particles on them
@@ -108,7 +109,7 @@ plot(mori_dens, 'fundamentalSector', 'contourf', 'colorrange', [0.5 2]);
 mtexTitle('All')
 mtexColorMap inferno
 mtexColorbar('title', 'MRD')
-export_fig(fullfile(dir_sample, 'mori_disp_axis_distributions.png'), res)
+%export_fig(fullfile(dir_sample, 'mori_disp_axis_distributions.png'), res)
 
 pause(0.5)
 
@@ -119,7 +120,7 @@ mtexColorMap blue2red
 if strcmp(sample, '325c')
     mtexColorbar('title', 'MRD difference')
 end
-export_fig(fullfile(dir_sample, 'mori_disp_axis_distributions_diff.png'), res)
+%export_fig(fullfile(dir_sample, 'mori_disp_axis_distributions_diff.png'), res)
 
 %% Plot angle histograms and differences between them for all GB
 figure
@@ -130,7 +131,7 @@ h(1).FaceColor = 'r';
 h(2).FaceColor = 'b';
 legend('With dispersoids', 'All')
 ylim([0 25])
-export_fig(fullfile(dir_sample, 'mori_angle_distributions.png'), res)
+%export_fig(fullfile(dir_sample, 'mori_angle_distributions.png'), res)
 
 %% Difference for all GB
 max_omega = maxAngle(cs);
@@ -158,7 +159,7 @@ xlabel('Misorientation angle (degrees)')
 ylabel('Frequency difference (%)')
 ylim([-1.2 1.2])
 set(gcf, 'color', 'w');
-export_fig(fullfile(dir_sample, 'mori_angle_distributions_diff.png'), res)
+%export_fig(fullfile(dir_sample, 'mori_angle_distributions_diff.png'), res)
 
 %% Axis density of all LAGBs and those with particles on them
 mori_disp_lagb_dens = calcDensity(v_mori_disp_lagb, 'weights',...
@@ -184,7 +185,7 @@ mtexColorMap blue2red
 if strcmp(sample, '325c')
     mtexColorbar('title', 'MRD difference')
 end
-export_fig(fullfile(dir_sample, 'mori_lagb_disp_axis_distributions_diff.png'), res)
+%export_fig(fullfile(dir_sample, 'mori_lagb_disp_axis_distributions_diff.png'), res)
 
 %% Recrystallized boundaries
 if any(mask_rx)
@@ -204,7 +205,7 @@ if any(mask_rx)
     frac_sigma7_rx_disp = sum(angle(mori_rx_disp, CSL(7, cs)) < 15 * degree) / size(mori_rx_disp, 1);
     disp(frac_sigma7_rx_disp / frac_sigma7_rx)
 
-    % Axis density of all GBs and those with dispersoids on them
+    % Axis density of all RX GBs and those with dispersoids on them
     mori_rx_disp_dens = calcDensity(v_mori_rx_disp, 'weights',...
     disp_per_length_rx);
     mori_rx_dens = calcDensity(v_mori_rx, 'weights', gb_length_rx);

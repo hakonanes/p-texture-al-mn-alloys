@@ -24,7 +24,7 @@ comp_names = {'random', 'b', 'c', 's', 'cube', 'cubend', 'p'};
 cs = crystalSymmetry('m-3m', [4.04 4.04 4.04], 'mineral', 'al');
 
 % Directory and file names
-sample = '0s'; % 0s, 175c, 300c, 325c
+sample = '300c'; % 0s, 175c, 300c, 325c
 dir_sample = fullfile('/home/hakon/phd/data/p/prover', sample);
 fname = 'grain_boundaries.txt';
 
@@ -102,58 +102,62 @@ v_mori_disp_lagb = mori_disp_lagb.axis;
 v_mori_disp_lagb.CS = cs;
 
 %% Axis density of all GBs and those with particles on them
-for i=1:7
+for i=6:7
     % All
     comp_mask_i = ismember(comp1, i) | ismember(comp2, i);
     v_mori_i = v_mori(comp_mask_i);
+    gb_length_i = gb_length(comp_mask_i);
     % With dispersoids
     comp_disp_mask_i = ismember(comp1_disp, i) | ismember(comp2_disp, i);
     v_mori_disp_i = v_mori_disp(comp_disp_mask_i);
+    disp_per_length_i = disp_per_length(comp_disp_mask_i);
+
+    mori_disp_dens_i = calcDensity(v_mori_disp_i, 'weights', disp_per_length_i);
+    mori_dens_i = calcDensity(v_mori_i, 'weights', gb_length_i);
 
     % With dispersoids and all
     figure
-    h1 = plot(v_mori_disp_i, 'fundamentalSector', 'contourf');
+    plot(mori_disp_dens_i, 'fundamentalSector', 'contourf');
     mtexTitle('With dispersoids')
     nextAxis
-    h2 = plot(v_mori_i, 'fundamentalSector', 'contourf', 'colorrange',...
-        c_range);
+    plot(mori_dens_i, 'fundamentalSector', 'contourf', 'colorrange', c_range);
     mtexTitle('All')
     mtexColorMap inferno
     mtexColorbar('title', 'MRD')
-    export_fig(fullfile(dir_sample,...
-        ['mori_disp_axis_distributions_' comp_names{i} '.png']), res)
+    export_fig(fullfile(dir_sample, 'mori_disp_axis_distributions.png'), res)
+
+    pause(0.5)
 
     % Difference
     figure
-    plot(v_mori_i, 'fundamentalSector')
-    hold on
-    v_grid = plotS2Grid(cs.fundamentalSector);
-    plot(v_grid, h1.ZData - h2.ZData, 'fundamentalSector', 'contourf',...
-        'colorrange', c_range_diff);
-    hold off
+    plot(mori_disp_dens_i - mori_dens_i, 'fundamentalSector', 'contourf',...
+        'colorrange', [-0.2 0.2])
     mtexColorMap blue2red
-    mtexColorbar('title', 'MRD')
-    export_fig(fullfile(dir_sample, ...
+    %if strcmp(sample, '325c')
+    %    mtexColorbar('title', 'MRD difference')
+    %end
+    export_fig(fullfile(dir_sample,...
         ['mori_disp_axis_distributions_diff_' comp_names{i} '.png']), res)
 end
 
 %% Plot angle histograms and differences between them for all GB
-bin_edges = linspace(0, maxAngle(cs), 20);
-bin_midpoints = bin_edges(2:end) - 0.5 * bin_edges(2);
-bin_midpoints_deg = bin_midpoints / degree;
-bar_width = 0.5 * bin_edges(2) / degree;
+max_omega = maxAngle(cs);
+bins = linspace(-eps, max_omega + 0.01, 15);
+bin_midpoints = 0.5*(bins(1:end - 1) + bins(2:end));
 
-for i=1:7
+for i=6:7
     % All
     comp_mask_i = ismember(comp1, i) | ismember(comp2, i);
     mori_i = mori(comp_mask_i);
-    mori_angles_dens_i = histcounts(mori_i.angle, bin_edges,...
+    mori_angles_dens_i = histcounts(mori_i.angle, bins,...
         'Normalization', 'probability');
     % With dispersoids
     comp_disp_mask_i = ismember(comp1_disp, i) | ismember(comp2_disp, i);
     mori_disp_i = mori_disp(comp_disp_mask_i);
-    mori_disp_angles_dens_i = histcounts(mori_disp_i.angle, bin_edges,...
+    mori_disp_angles_dens_i = histcounts(mori_disp_i.angle, bins,...
         'Normalization', 'probability');
+
+    mori_angle_diff = 100 * (mori_disp_angles_dens_i - mori_angles_dens_i);
 
     % W/o dispersoids
     figure
@@ -167,24 +171,21 @@ for i=1:7
     export_fig(fullfile(dir_sample,...
         ['mori_angle_distributions_' comp_names{i} '.png']), res)
 
-    % Difference for all GB
-    mori_angle_diff_i = mori_disp_angles_dens_i - mori_angles_dens_i;
-
+    % Difference
     figure
-    for j=1:(length(bin_edges) - 1)
-        mori_angle_diff_j = mori_angle_diff_i(j);
+    for j=1:length(bin_midpoints)
+        mori_angle_diff_j = mori_angle_diff(j);
         if mori_angle_diff_j > 0
             bar_color = 'red';
         else
             bar_color = 'blue';
         end
-        bar(bin_midpoints_deg(j), mori_angle_diff_j, bar_width,...
-            'FaceColor', bar_color)
+        bar(bin_midpoints(j) / degree, mori_angle_diff_j, 'FaceColor', bar_color)
         hold on
     end
-    xlabel('Misorientation angle [deg]')
+    xlabel('Misorientation angle (degrees)')
     ylabel('Frequency difference (%)')
-    ylim([-0.15 0.15])
+    ylim([-6 6])
     set(gcf, 'color', 'w');
     export_fig(fullfile(dir_sample,...
         ['mori_angle_distributions_diff_' comp_names{i} '.png']), res)
