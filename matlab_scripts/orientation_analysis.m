@@ -1,10 +1,10 @@
 % Correlated BSE/EBSD analysis of Al and particles in an Al-Mn alloy
 %
-% Håkon Wiik Ånes (hakon.w.anes@ntnu.no)
-% 2022-09-11
+% Håkon Wiik Ånes (hakon.w.anes@ntnu.no), 2022-11-24
+% Norwegian University of Science and Technology (NTNU)
 
-clear variables
-close all
+%clear variables
+%close all
 
 % Generate figures?
 to_plot = 0;
@@ -125,7 +125,7 @@ if 0
     legend('hide')
     hold off
     export_fig(fullfile(dir_mtex, 'maps_gnd_gb.png'), res)
-    close(figure)
+%    close(figure)
 end
 
 %% Plot orientation maps
@@ -232,7 +232,8 @@ end
 grains2.prop.ideal_ori = ideal_ori;
 grains2.prop.ideal_ori_id = ideal_ori_id;
 
-%% Plot orientation map of higher fidelity
+%% Plot orientation map of higher fidelity to illustrate
+% a multimodal dataset (from dataset #1 at 300 C)
 %region = [40, 35, 15, 15];
 
 % EBSD ROI

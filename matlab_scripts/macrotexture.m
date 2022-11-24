@@ -1,18 +1,20 @@
-%% Macrotexture from AA3xxx cold rolled to a true strain of 3.0 with a
-% pronounced P texture component
+%% Macrotexture from XRD pole figures of AA3xxx cold-rolled to a true strain
+% of 3.0 and non-isothermally annealed at 50 C/h from room temperature to
+% 400 C.
 %
-% Created 2019-10-24 by Håkon Wiik Ånes (hakon.w.anes@ntnu.no)
+% Håkon Wiik Ånes (hakon.w.anes@ntnu.no), 2022-11-24
+% Norwegian University of Science and Technology (NTNU)
 
-clear all
-close all
+%clear all
+%close all
 home
+
+% Set some parameters
+to_plot = 1;
+res = '-r100';
 
 %% Import pole figure data and create PoleFigure object
 cs = crystalSymmetry('m-3m', [4.04 4.04 4.04], 'mineral', 'Al');
-
-to_plot = 1;
-
-res = '-r100';
 
 % Select sample
 s0 = '00_191023_e3_asdef';
@@ -96,7 +98,6 @@ intensities = {
 pfs = PoleFigure(h, pf1.r, intensities, cs, ss);
 
 %% Plot pole figures of raw, corrected data
-
 if to_plot
     figure;
     plot(pfs, 'upper', 'projection', 'eangle', 'minmax')
@@ -126,24 +127,35 @@ comps = {br, cu, s, cube, cubeND, p};
 comp_colors = {'g', 'b', 'm', 'r', 'orange', 'c'};
 comp_markers = {'d', '^', 'p', 's', 's', '>'};
 
-%% ODF in PFs with specified contour levels
+%% Calculate volume fractions Mi
+odf.SS = ssO;
+spread = 15*degree;
 
+Mbr = 100*volume(odf, br, spread)
+Mcu = 100*volume(odf, cu, spread)
+Ms = 100*volume(odf, s, spread)
+Mcube = 100*volume(odf, cube, spread)
+McubeND = 100*volume(odf, cubeND, spread)
+Mp = 100*volume(odf, p, spread)
+
+%% ODF in PFs with specified contour levels
 if to_plot
     levelsPF = [0, 1, 2, 3, 4, 5];
-
     odf.SS = ss;
+
     figure
     plotPDF(odf, h, 'upper', 'projection', 'eangle', 'contourf', levelsPF)
     mtexColorMap white2black
     mtexColorbar
+
     export_fig(fullfile(outpath, 'odf_pfs.png'), res);
 end
 
-%% ODF in PFs with specified contour levels
+%% ODF in PFs with specified contour levels and annotations
 if to_plot
     levelsPF = [0, 1, 2, 3, 4, 5];
-
     odf.SS = ss;
+
     figure
     plotPDF(odf, h, 'upper', 'projection', 'eangle', 'contourf', levelsPF)
     mtexColorMap white2black
@@ -154,15 +166,15 @@ if to_plot
     end
     mtexColorbar('title', 'Multiples of Random Density (MRD)')
     hold off
+
     export_fig(fullfile(outpath, 'odf_pfs_annotated.png'), res);
 end
 
-%% Plot ODF in most relevant Euler space phi2 sections
-
+%% Plot ODF in most relevant Euler space phi2 sections with annotations
 if to_plot
     levelsODF = [0, 1, 2, 3, 4, 8, 12];
-
     odf.SS = ssO;
+
     figure
     plot(odf, 'phi2', [0 45 65]*degree, 'contourf', levelsODF)
     mtexColorMap white2black
@@ -173,11 +185,11 @@ if to_plot
     end
     mtexColorbar('title', 'Multiples of Random Density (MRD)')
     hold off
+
     export_fig(fullfile(outpath, 'odf_sections.png'), res);
 end
 
-%% Plot inverse pole figure
-
+%% Plot inverse pole figure with annotations
 if to_plot
     figure
     plotIPDF(odf, [xvector, yvector, zvector], 'contourf') % contoured
@@ -189,19 +201,19 @@ if to_plot
     end
     mtexColorbar('title', 'Multiples of Random Density (MRD)')
     hold off
+
     export_fig(fullfile(outpath, 'odf_ipfs.png'), res);
 end
 
 %% Plot intensity along beta fibre from Cu to Brass and write results to
 % file
-
 cu_fiber = orientation.byEuler([90 35 45] * degree, cs, ssO);
 br_fiber = orientation.byEuler([35 45 90] * degree, cs, ssO);
 
 odf.SS = ssO;
 f = fibre(cu_fiber, br_fiber, cs, ssO);
 
-% generate list from fibres and evalute ODF at specific orientations
+% Generate list from fibres and evalute ODF at specific orientations
 fibreOris = f.orientation;
 evalOris = [];
 evalIndex = [1 84 167 254 346 446 556 680 824 1000];
@@ -218,6 +230,7 @@ if to_plot
     xlabel('\phi_2 \rightarrow', 'interpreter', 'tex')
     ylabel('Orientation density f(g)', 'interpreter', 'tex')
     xlim([45 90])
+
     export_fig(fullfile(outpath, 'fibre_beta.png'), res);
 end
 
@@ -253,6 +266,7 @@ if to_plot
     xlabel('\Phi \rightarrow', 'interpreter', 'tex')
     ylabel('Orientation density f(g)', 'interpreter', 'tex')
     xlim([min([f.o1.Phi f.o2.Phi]) max([f.o1.Phi f.o2.Phi])] / degree)
+
     export_fig(fullfile(outpath, 'fibre_cube_goss.png'), res);
 end
 
@@ -288,6 +302,7 @@ if to_plot
     xlabel('\phi_1 \rightarrow', 'interpreter', 'tex')
     ylabel('Orientation density f(g)', 'interpreter', 'tex')
     xlim([min([f.o1.phi1 f.o2.phi1]) max([f.o1.phi1 f.o2.phi1])] / degree)
+
     export_fig(fullfile(outpath, 'fibre_cube_cubend.png'), res);
 end
 
@@ -324,6 +339,7 @@ if to_plot
     xlabel('\phi_1 \rightarrow', 'interpreter', 'tex')
     ylabel('Orientation density f(g)', 'interpreter', 'tex')
     xlim([min([f.o1.phi1 f.o2.phi1]) max([f.o1.phi1 f.o2.phi1])] / degree)
+
     export_fig(fullfile(outpath, 'fibre_goss_p.png'), res);
 end
 
@@ -338,17 +354,3 @@ fclose(fid);
 % Write Euler angles and intensities to file
 dlmwrite(datafname, [(evalOris.phi1/degree)' (evalOris.Phi/degree)'...
     (evalOris.phi2/degree)' evalValues'], '-append')
-
-%%
-close all
-
-%% Calculate volume fractions Mi
-odf.SS = ssO;
-spread = 15*degree;
-
-Mbr = 100*volume(odf, br, spread)
-Mcu = 100*volume(odf, cu, spread)
-Ms = 100*volume(odf, s, spread)
-Mcube = 100*volume(odf, cube, spread)
-McubeND = 100*volume(odf, cubeND, spread)
-Mp = 100*volume(odf, p, spread)

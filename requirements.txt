@@ -5,14 +5,14 @@ diffsims >= 0.5.0
 hyperspy
 importlib_metadata
 jupyterlab
-kikuchipy >= 0.6.1
+kikuchipy >= 0.7.0
 matplotlib
 matplotlib_scalebar
 morphops
 numpy
-orix >= 0.9
+orix >= 0.10.2
 pandas
-pyebsdindex
+pyebsdindex >= 0.1.1
 pyexcel-ods3
 PyQt5
 scipy

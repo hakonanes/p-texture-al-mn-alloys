@@ -2,15 +2,16 @@
 #
 # Density of dispersoids by constituent particles
 # 
-# Håkon Wiik Ånes (hakon.w.anes@ntnu.no)
+# Håkon Wiik Ånes (hakon.w.anes@ntnu.no), 2022-11-24
+# Norwegian University of Science and Technology (NTNU)
 # 
 # Procedure:
 # 1. Get label map for particles
 # 2. Expand label map using `skimage.segmentation.expand_labels()`, which uses `scipy.ndimage.distance_transform_edt()`
 # 3. Get masks of region inside precipitate-free zones (PFZs), excluding big particles, and outside
 # 4. Calculate:
-#     1. Density of particles inside and outside PFZs
-#     2. Area weighted particle size inside and outside PFZs
+#     A. Density of particles inside and outside PFZs
+#     B. Area weighted particle size inside and outside PFZs
 
 import argparse
 from pathlib import Path
@@ -37,7 +38,7 @@ dset = str(args.dset)
 constituent_threshold = float(args.ct)
 pfz_extent = float(args.tpfz)
 
-step_size = dict(bse=1 / 39.2)
+bse_step_size = 1 / 39.2
 
 # Particle size thresholds in um for constituent particles (PSN) and
 # dispersoids (Smith-Zener drag)
@@ -45,7 +46,7 @@ dispersoid_threshold_max = 0.24  # um
 dispersoid_threshold_min = 0.03  # um
 
 # Extent of PFZ out from constituent particles in um
-pfz_extent_px = int(np.ceil(pfz_extent * step_size["bse"] * 1e3))
+pfz_extent_px = int(np.ceil(pfz_extent * bse_step_size * 1e3))
 
 # Load data
 dir_data = Path("/home/hakon/phd/data/p/prover") / sample / str(dset) / "partdet"
@@ -53,7 +54,7 @@ img = np.load(dir_data / "bse_labels_filled_filtered.npy")
 
 # Get label map of particles
 seg1 = label(img)
-mreg = MapRegions(seg1, dx=step_size["bse"], dy=step_size["bse"], background_label=0, scan_unit="um")
+mreg = MapRegions(seg1, dx=bse_step_size, dy=bse_step_size, background_label=0, scan_unit="um")
 
 # Get big particles
 mask_big = 0.816 * 2 * mreg.equivalent_radius >= constituent_threshold
@@ -66,20 +67,20 @@ mask = seg2 > 0
 # Mask and area of precipitate-free zones (PFZs)
 pfz = mask.astype(int) - (~mreg_big.is_background_map).astype(int)
 pfz = pfz.astype(bool)
-area_pfz = np.sum(pfz) * step_size["bse"] ** 2
+area_pfz = np.sum(pfz) * bse_step_size ** 2
 
 # Mask and area of pixels outside PFZs (excluding constituent particles themselves)
 not_pfz = ~pfz
 not_pfz[~mreg_big.is_background_map] = False
-area_not_pfz = np.sum(not_pfz) * step_size["bse"] ** 2
+area_not_pfz = np.sum(not_pfz) * bse_step_size ** 2
 
 # Sanity checks (raise assertion error(s) if false)
 # Mask sizes
 assert np.sum([pfz, not_pfz, ~mreg_big.is_background_map]) == img.size
 # Areas
 assert np.allclose(
-    np.sum([area_pfz, area_not_pfz, np.sum(~mreg_big.is_background_map) * step_size["bse"] ** 2]),
-    img.size * step_size["bse"] ** 2,
+    np.sum([area_pfz, area_not_pfz, np.sum(~mreg_big.is_background_map) * bse_step_size ** 2]),
+    img.size * bse_step_size ** 2,
     atol=1e-5
 )
 

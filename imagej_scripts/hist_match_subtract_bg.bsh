@@ -1,0 +1,50 @@
+// BeanShell script automating some ImageJ operations on backscatter electron (BSE) images:
+//   1. Make the intensity histogram in every image similar to the histogram in the BSE image from dataset 1 at 300 C
+//   2. Create an image to detect larger particles via thresholding and binarization (done manually)
+//   3. Create an image to detect smaller particles via thresholding and binaziration (done manually)
+//
+// Håkon Wiik Ånes (hakon.w.anes@ntnu.no), 2022-11-24
+// Norwegian University of Science and Technology (NTNU)
+
+import ij.IJ;
+import histogram2.HistogramMatcher;
+
+// Set input file based on condition and dataset number
+sample = "325c";
+dset = "3";
+fname = "/home/hakon/phd/data/p/prover/" + sample + "/" + dset + "/bse/" + "4500x_cropped2_fused_cropped";
+
+// Read image to process and reference image for histogram matching
+img1 = IJ.openImage(fname + ".png");
+img2 = IJ.openImage("/home/hakon/phd/data/p/prover/300c/1/bse/4500x_cropped2_fused_cropped.png");
+
+// Set data type to 8-bit
+IJ.run(img1, "8-bit", "");
+
+// Histogram matching
+ip1 = img1.getProcessor();
+ip2 = img2.getProcessor();
+hist1 = ip1.getHistogram();
+hist2 = ip2.getHistogram();
+matcher = new HistogramMatcher();
+newHist = matcher.matchHistograms(hist1, hist2);
+ip1.applyTable(newHist);
+img1.setProcessor(ip1);
+
+// Save image
+IJ.saveAs(img1, "PNG", fname + "_histmatch.png");
+
+// Create and subtract a rolling ball background image
+img3 = img1.duplicate();
+IJ.run(img3, "Subtract Background...", "rolling=1 create");
+img4 = img1.duplicate();
+IJ.run(img4, "Subtract Background...", "rolling=1");
+
+// Threshold larger particles and save mask.
+// (Do binarization manually because I cannot figure out how to code it.)
+IJ.setAutoThreshold(img3, "Minimum dark");
+img3.show();
+
+// Threshold smaller particles and save mask
+IJ.setAutoThreshold(img4, "Yen dark");
+img4.show();
