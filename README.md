@@ -56,7 +56,8 @@ Files:
 * `bse4_density_disp_by_const_part.ipynb`: Calculate the density and average size of dispersoids within deformation zones of large constituent particles relative to elsewhere in the microstructure.
 * `bse4_density_disp_by_const_part.py`: The above notebook as a *Python* script accepting input parameters.
 * `run_bse4_density_disp_by_const_part.sh`: Shell script to run the above *Python* script per dataset with varying parameter values. Useful when doing a parameter search or just automating the calculations.
-* `figures_in_paper.ipynb`: Generate most of the figures used in the paper.
+* `figures_in_paper.ipynb`: Generate most of the figures used in the paper (and some for the supplementary).
+* `figures_in_supplementary.ipynb`: Generate most of the figures in the supplementary.
 
 Installation of packages has been tested to work on *Linux* (*Ubuntu* 22.04) and *Windows* 10. All notebooks have been tested to work on *Linux*, while the two indexing and refinement notebooks have also been tested to work on *Windows* 10.
 
