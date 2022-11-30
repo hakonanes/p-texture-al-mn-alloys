@@ -7,7 +7,7 @@
 %close all
 
 % Generate figures?
-to_plot = 0;
+to_plot = 1;
 plot_sanity_check = 0;
 
 % MTEX configuration
@@ -24,8 +24,8 @@ cs_al = cs{2};
 ssO = specimenSymmetry('orthorhombic');
 
 % Directory and file names
-sample = '325c'; % 0s, 175c, 300c, 325c
-dset_no = '1';
+sample = '0s'; % 0s, 175c, 300c, 325c
+dset_no = '3';
 dir_data = fullfile('/home/hakon/phd/data/p/prover', sample, dset_no);
 disp(dir_data)
 dir_kp = fullfile(dir_data, 'kp');
@@ -69,22 +69,13 @@ constituent_particle_threshold = 0.8;
 om_al = ipfHSVKey(cs_al);
 om_al.CS2 = ssO;
 
-%% Add GND density (computed elsewhere) to properties
-%gnd_struct = load(fullfile(dir_mtex, 'gnd.mat'));
-%gnd = gnd_struct.gnd;
-
-%% Add property (must be done before subgrain reconstruction!)
-%ebsdg = ebsd.gridify;
-%ebsdg.prop.gnd = gnd;
-%ebsd = ebsdg(~isnan(ebsdg.oldId));
-
 %% (Sub)grain reconstruction
 ebsd2 = ebsd;
 
 [grains, ebsd2.grainId, ebsd2.mis2mean] = calcGrains(ebsd2, 'angle',...
     mat, 'boundary', 'tight', 'unitCell');
 
-% Assign small Al subgrains to surrounding subgrains
+% Remove small Al (sub)grains
 ebsd3 = ebsd2(grains(grains.grainSize < 5));
 ebsd3 = ebsd3('al');
 ebsd2(ismember(ebsd2.id, ebsd3.id)) = [];
@@ -111,22 +102,6 @@ gb2 = grains2.boundary;
 mori = gb2.misorientation.angle ./ degree;
 bin_edges = [mat hab max(mori)];
 [~, ~, gb2Id] = histcounts(mori, 'NumBins', 2, 'BinEdges', bin_edges);
-
-%% Plot GNDs, boundaries and particles
-if 0
-    figure
-    plot(ebsd, ebsd.gnd, 'micronBar', 'off')
-    mtexColorMap LaboTeX
-    caxis([1e12 1e15])
-    hold on
-    plot(ebsd('notIndexed'), 'facecolor', 'k')
-    plot(gb2(gb2Id == 1), 'linecolor', [0.7 0.7 0.7], 'linewidth', 1)
-    plot(gb2(gb2Id == 2), 'linecolor', [0 0 0], 'linewidth', 1);
-    legend('hide')
-    hold off
-    export_fig(fullfile(dir_mtex, 'maps_gnd_gb.png'), res)
-%    close(figure)
-end
 
 %% Plot orientation maps
 if to_plot
@@ -177,12 +152,11 @@ s = rot_scan2global * orientation.byMiller([1 2 3], [6 3 4], cs_al, ssO);
 cube = rot_scan2global * orientation.byEuler(0, 0, 0, cs_al, ssO);
 cubend = rot_scan2global * orientation.byMiller([0 0 1], [3 1 0], cs_al, ssO);
 p = rot_scan2global * orientation.byMiller([0 1 1], [-5 -6 6], cs_al, ssO);
-goss = rot_scan2global * orientation.byEuler(0, 45*degree, 0, cs_al, ssO);
 
-ideal_oris = {br, cu, s, cube, cubend, p, goss};
-ideal_colors = {'m', 'b', 'g', 'r', [1 0.55 0], 'c', 'y'};
-ideal_markers = {'d', '^', 'p', 's', 's', '>', 'o'};
-ideal_oris_labels = {'br', 'cu',  's', 'cube', 'cubend', 'p', 'goss'};
+ideal_oris = {br, cu, s, cube, cubend, p};
+ideal_colors = {'m', 'b', 'g', 'r', [1 0.55 0], 'c'};
+ideal_markers = {'d', '^', 'p', 's', 's', '>'};
+ideal_oris_labels = {'br', 'cu',  's', 'cube', 'cubend', 'p'};
 n_ideal = length(ideal_oris);
 
 %% Plot inverse pole figure key with components annotated
@@ -296,9 +270,13 @@ if to_plot
     plot(ebsd('notIndexed'), 'facecolor', 'k')
     legend('hide')
     export_fig(fullfile(dir_mtex, 'maps_grains_ideal_particles.png'), res)
+
+    pause(1)
+
     plot(gb2(gb2Id == 1), 'linecolor', [0.7 0.7 0.7], 'linewidth', 1)
     plot(gb2(gb2Id == 2), 'linecolor', [0 0 0], 'linewidth', 1)
     export_fig(fullfile(dir_mtex, 'maps_grains_ideal_particles_gb.png'), res)
+
     close(gcf)
 end
 
