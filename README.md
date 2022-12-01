@@ -1,8 +1,8 @@
-# Effect of concurrent precipitation on P texture in Al-Mn alloys
+# Scripts for the paper *Orientation dependent pinning of (sub)grains by dispersoids during recovery and recrystallization in an Al-Mn alloy*
 
-*Zenodo* DOI coming after first 'release' of repository.
+A *Zenodo* DOI is added here after the first 'release' of this repository.
 
-This repository contains *Jupyter* notebook files, *MATLAB* scripts, and other files, apart from the raw BSE images and EBSD datasets, which are necessary to reproduce the results and figures in the paper X, submitted to X:
+This repository contains *Jupyter* notebooks, *MTEX* (*MATLAB*) and *ImageJ*scripts, and other files, apart from the raw BSE images and EBSD datasets, which are necessary to reproduce the results and figures in the paper *Orientation dependent pinning of (sub)grains by dispersoids during recovery and recrystallization in an Al-Mn alloy* (2022), submitted to X:
 
 ```bibtex
 @article{entry,
@@ -21,14 +21,13 @@ The preprint is available on *arXiv* (doi link):
 }
 ```
 
-The raw EBSD and BSE data is available on *Zenodo* (doi link):
+The raw EBSD and BSE data is available on *Zenodo* ([doi](https://doi.org/10.5281/zenodo.7383087)):
 
 ```bibtex
 @dataset{entry,
   year      = {2022},
 }
 ```
-
 
 The contents in this repository is licensed under the GPLv3+, since many of the softwares used have the same license.
 
@@ -59,7 +58,7 @@ Files:
 * `figures_in_paper.ipynb`: Generate most of the figures used in the paper (and some for the supplementary).
 * `figures_in_supplementary.ipynb`: Generate most of the figures in the supplementary.
 
-Installation of packages has been tested to work on *Linux* (*Ubuntu* 22.04) and *Windows* 10. All notebooks have been tested to work on *Linux*, while the two indexing and refinement notebooks have also been tested to work on *Windows* 10.
+Installation of the packages has been tested to work on *Linux* (*Ubuntu* 22.04) and *Windows* 10. All notebooks have been tested to work on *Linux*, while the two indexing and refinement notebooks have also been tested to work on *Windows* 10.
 
 ### matlab_scripts
 
