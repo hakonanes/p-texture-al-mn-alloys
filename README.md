@@ -1,22 +1,24 @@
-# Scripts for the paper *Orientation dependent pinning of (sub)grains by dispersoids during recovery and recrystallization in an Al-Mn alloy*
+# Code for the paper *Orientation dependent pinning of (sub)grains by dispersoids during recovery and recrystallization in an Al-Mn alloy*
 
-A *Zenodo* DOI is added here after the first 'release' of this repository.
+A *Zenodo* DOI will be added here after the first 'release' of this repository.
 
-This repository contains *Jupyter* notebooks, *MTEX* (*MATLAB*) and *ImageJ*scripts, and other files, apart from the raw BSE images and EBSD datasets, which are necessary to reproduce the results and figures in the paper *Orientation dependent pinning of (sub)grains by dispersoids during recovery and recrystallization in an Al-Mn alloy* (2022), submitted to X:
+This repository contains *Jupyter* notebooks, *MTEX* (*MATLAB*) and *ImageJ* scripts, and other files, apart from the raw BSE images and EBSD datasets, which are necessary to reproduce the results and figures in the paper *Orientation dependent pinning of (sub)grains by dispersoids during recovery and recrystallization in an Al-Mn alloy* (2022), submitted to X:
 
 ```bibtex
 @article{entry,
-  author   = {Håkon W. Ånes and Antonius T. J. {van Helvoort} and Knut Marthinsen},
-  year     = {2022},
+  author = {H{\aa}kon Wiik {\AA}nes and Antonius T. J. van Helvoort and Knut Marthinsen},
+  year   = {2022},
 }
-
 ```
 
-The preprint is available on *arXiv* (doi link):
+The preprint is available on *arXiv* ([doi](https://doi.org/10.48550/arXiv.2212.03527)):
 
 ```bibtex
-@article{entry,
-  author   = {Håkon W. Ånes and Antonius T. J. {van Helvoort} and Knut Marthinsen},
+@article{anes2022orientation_arxiv,
+  author  = {{\AA}nes, H{\aa}kon Wiik and van Helvoort, Antonius TJ and Marthinsen, Knut},
+  title   = {{Orientation dependent pinning of (sub)grains by dispersoids during recovery and recrystallization in an Al-Mn alloy}},
+  doi     = {10.48550/arxiv.2212.03527},
+  journal = {arXiv preprint arXiv:2212.03527},
   year    = {2022},
 }
 ```
@@ -24,7 +26,12 @@ The preprint is available on *arXiv* (doi link):
 The raw EBSD and BSE data is available on *Zenodo* ([doi](https://doi.org/10.5281/zenodo.7383087)):
 
 ```bibtex
-@dataset{entry,
+@dataset{aanes2022orientation_data,
+  author    = {H{\aa}kon Wiik {\AA}nes and Antonius T. J. van Helvoort and Knut Marthinsen},
+  title     = {{Electron backscatter diffraction data and backscatter electron images from four conditions from a cold-rolled and annealed Al-Mn alloy}},
+  doi       = {10.5281/zenodo.7383087},
+  note      = {{The data was acquired while Håkon Wiik Ånes received financial support from the Norwegian University of Science and Technology (NTNU) through the NTNU Aluminium Product Innovation Centre (NAPIC).}},
+  publisher = {Zenodo},
   year      = {2022},
 }
 ```
@@ -46,7 +53,7 @@ pip install -r requirements.txt
 Files:
 
 * `ebsd1_dewrap.ipynb`: EBSD datasets acquired with a *NORDIF* detector are sometimes written with the last column of patterns as the first column. This notebook checks if this is the case, places the patterns correctly in the map, and writes them to an HDF5 file in the *kikuchipy* h5ebsd format.
-* `ebsd2_preprocess.ipynb`: Generate indexing-independent views of an EBSD dataset (mean intensity map, virtual backscatter electron images, image quality map, and average neighbour dot product map) and calibrate the detector-sample geometry via projection center (PC) optimization with the [*PyEBSDIndex* *Python* package](https://github.com/USNavalResearchLaboratory/PyEBSDIndex). An average PC is used in dictionary indexing.
+* `ebsd2_preprocess.ipynb`: Generate indexing-independent views of an EBSD dataset (mean intensity map, virtual backscatter electron images, image quality map, and average neighbour dot product map) and calibrate the detector-sample geometry via projection center (PC) optimization with the *PyEBSDIndex* *Python* package. An average PC is used in dictionary indexing.
 * `ebsd3_dictionary_indexing.ipynb`: Obtain crystal orientations from the EBSD patterns via dictionary indexing (DI) as implemented in kikuchipy. Requires an Al master pattern generated with *EMsoft*.
 * `ebsd4_refinement.ipynb`: Refine crystal orientations obtained from DI.
 * `bse1_crop_bse_images.ipynb`: Crop BSE images prior to and after stitching with *BigStitcher* in *ImageJ*.
