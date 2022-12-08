@@ -1,6 +1,6 @@
 # Code for the paper *Orientation dependent pinning of (sub)grains by dispersoids during recovery and recrystallization in an Al-Mn alloy*
 
-A *Zenodo* DOI will be added here after the first 'release' of this repository.
+[![Repository DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7413384.svg)](https://doi.org/10.5281/zenodo.7413384)
 
 This repository contains *Jupyter* notebooks, *MTEX* (*MATLAB*) and *ImageJ* scripts, and other files, apart from the raw BSE images and EBSD datasets, which are necessary to reproduce the results and figures in the paper *Orientation dependent pinning of (sub)grains by dispersoids during recovery and recrystallization in an Al-Mn alloy* (2022), submitted to X:
 
