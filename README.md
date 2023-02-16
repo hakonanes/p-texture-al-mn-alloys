@@ -2,24 +2,18 @@
 
 [![Repository DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7413384.svg)](https://doi.org/10.5281/zenodo.7413384)
 
-This repository contains *Jupyter* notebooks, *MTEX* (*MATLAB*) and *ImageJ* scripts, and other files, apart from the raw BSE images and EBSD datasets, which are necessary to reproduce the results and figures in the paper *Orientation dependent pinning of (sub)grains by dispersoids during recovery and recrystallization in an Al-Mn alloy* (2022), submitted to X:
+This repository contains *Jupyter* notebooks, *MTEX* (*MATLAB*) and *ImageJ* scripts, and other files, apart from the raw BSE images and EBSD datasets, which are necessary to reproduce the results and figures in the paper *Orientation dependent pinning of (sub)grains by dispersoids during recovery and recrystallization in an Al-Mn alloy* (2023), published in *Acta Materialia* ([doi](https://doi.org/10.1016/j.actamat.2023.118761)):
 
 ```bibtex
-@article{entry,
-  author = {H{\aa}kon Wiik {\AA}nes and Antonius T. J. van Helvoort and Knut Marthinsen},
-  year   = {2022},
-}
-```
-
-The preprint is available on *arXiv* ([doi](https://doi.org/10.48550/arXiv.2212.03527)):
-
-```bibtex
-@article{anes2022orientation_arxiv,
-  author  = {{\AA}nes, H{\aa}kon Wiik and van Helvoort, Antonius TJ and Marthinsen, Knut},
-  title   = {{Orientation dependent pinning of (sub)grains by dispersoids during recovery and recrystallization in an Al-Mn alloy}},
-  doi     = {10.48550/arxiv.2212.03527},
-  journal = {arXiv preprint arXiv:2212.03527},
-  year    = {2022},
+@article{aanes2023orientation,
+  author    = {{\AA}nes, H{\aa}kon W and van Helvoort, Antonius TJ and Marthinsen, Knut},
+  title     = {Orientation dependent pinning of (sub) grains by dispersoids during recovery and recrystallization in an Al-Mn alloy},
+  doi       = {10.1016/j.actamat.2023.118761},
+  pages     = {118761},
+  volume    = {248},
+  journal   = {Acta Materialia},
+  publisher = {Elsevier},
+  year      = {2023},
 }
 ```
 
@@ -33,6 +27,18 @@ The raw EBSD and BSE data is available on *Zenodo* ([doi](https://doi.org/10.528
   note      = {{The data was acquired while Håkon Wiik Ånes received financial support from the Norwegian University of Science and Technology (NTNU) through the NTNU Aluminium Product Innovation Centre (NAPIC).}},
   publisher = {Zenodo},
   year      = {2022},
+}
+```
+
+The preprint is available on *arXiv* ([doi](https://doi.org/10.48550/arXiv.2212.03527)):
+
+```bibtex
+@article{aanes2022orientation_arxiv,
+  author  = {{\AA}nes, H{\aa}kon Wiik and van Helvoort, Antonius TJ and Marthinsen, Knut},
+  title   = {{Orientation dependent pinning of (sub)grains by dispersoids during recovery and recrystallization in an Al-Mn alloy}},
+  doi     = {10.48550/arxiv.2212.03527},
+  journal = {arXiv preprint arXiv:2212.03527},
+  year    = {2022},
 }
 ```
 
